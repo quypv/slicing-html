@@ -1,0 +1,30 @@
+$sp_sc_2x : "../img/sprite_icons@2x.png";
+$sp_width: 2586px;
+$sp_height: 106px;
+
+$sprite : (
+  menu-home : 56px 56px -10px -10px,
+);
+
+@mixin sprite-icon($name) {
+  $map : map-get($sprite, $name);
+  
+  width: nth(($map), 1) /2;
+  height: nth(($map), 2) /2;
+  background-position: nth(($map), 3)/2 nth(($map), 4)/2;
+  background-image: url($sp_sc_2x);
+  background-size: $sp_width/2 $sp_height/2;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+//icon classes
+@for $i from 1 through length($sprite) {
+  $name : nth(nth($sprite, $i), 1);
+  .mvt-ic-#{$name} { @include sprite-icon($name) }
+} 
+ 
+
+
+
+

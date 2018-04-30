@@ -1,0 +1,7 @@
+/output
+!/output/.gitkeep
+/assets/build/
+/node_modules/
+package-lock.json
+/.idea
+/buildversion
