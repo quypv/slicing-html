@@ -8,6 +8,8 @@ var prettify = require('gulp-html-prettify');
 var sourcemaps = require('gulp-sourcemaps');
 var cleanCSS = require('gulp-clean-css');
 var rename = require('gulp-rename');
+var jshint = require('gulp-jshint');
+var jshintStylish = require('jshint-stylish');
 
 // --------------------------------------------------
 // SASS
@@ -33,24 +35,42 @@ gulp.task('sass', function () {
 // JS
 // --------------------------------------------------
 
+gulp.task('js-vendor', function () {
+  return gulp
+    .src([
+      'assets/source/lib/jquery/jquery-3.0.0.js',
+      'assets/source/lib/bootstrap-4.1.0/js/bootstrap.js',
+    ])
+    .pipe(concat('vendor.js'))
+    .pipe(gulp.dest('output/js'));
+});
+
 gulp.task('js', function () {
   return gulp
     .src([
       'assets/source/js/app.js',
+      'assets/source/js/home.js',
     ])
     .pipe(concat('app.js'))
     .pipe(gulp.dest('output/js'));
 });
 
-gulp.task('scripts', ['js']);
+gulp.task('js-lint', ['js'], function() {
+  return gulp.src('assets/source/js/**/*.js')
+    .pipe(jshint())
+    .pipe(jshint.reporter(jshintStylish));
+});
+
+gulp.task('scripts', ['js-vendor', 'js', 'js-lint']);
 
 // --------------------------------------------------
 // Minify
 // --------------------------------------------------
 
-gulp.task('minify-js', function () {
+gulp.task('minify-js', ['scripts'], function () {
   return gulp
     .src([
+      'output/js/vendor.js',
       'output/js/app.js',
     ])
     .pipe(minify({
@@ -62,8 +82,11 @@ gulp.task('minify-js', function () {
     .pipe(gulp.dest('output/js'));
 });
 
-gulp.task('minify-css', function() {
-  return gulp.src('output/css/*.css')
+gulp.task('minify-css', ['sass'], function() {
+  return gulp.src([
+    'output/css/*.css',
+    '!output/css/*.min.css',
+  ])
     .pipe(sourcemaps.init())
     .pipe(cleanCSS())
     .pipe(sourcemaps.write('./'))
