@@ -5,6 +5,9 @@ var autoprefixer = require('gulp-autoprefixer');
 var minify = require('gulp-minify');
 var fileinclude = require('gulp-file-include');
 var prettify = require('gulp-html-prettify');
+var sourcemaps = require('gulp-sourcemaps');
+var cleanCSS = require('gulp-clean-css');
+var rename = require('gulp-rename');
 
 // --------------------------------------------------
 // SASS
@@ -13,6 +16,7 @@ var prettify = require('gulp-html-prettify');
 gulp.task('sass', function () {
   return gulp
     .src('assets/source/scss/app.scss')
+    .pipe(sourcemaps.init())
     .pipe(sass()) // Using gulp-sass
     .pipe(autoprefixer({
       browsers: [
@@ -21,6 +25,7 @@ gulp.task('sass', function () {
       ],
       cascade: false
     }))
+    .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('output/css'));
 });
 
@@ -43,7 +48,7 @@ gulp.task('scripts', ['js']);
 // Minify
 // --------------------------------------------------
 
-gulp.task('build', function () {
+gulp.task('minify-js', function () {
   return gulp
     .src([
       'output/js/app.js',
@@ -56,6 +61,17 @@ gulp.task('build', function () {
     }))
     .pipe(gulp.dest('output/js'));
 });
+
+gulp.task('minify-css', function() {
+  return gulp.src('output/css/*.css')
+    .pipe(sourcemaps.init())
+    .pipe(cleanCSS())
+    .pipe(sourcemaps.write('./'))
+    .pipe(rename({suffix: '.min'}))
+    .pipe(gulp.dest('output/css'));
+});
+
+gulp.task('minify', ['minify-js', 'minify-css']);
 
 // --------------------------------------------------
 // Font
@@ -119,4 +135,4 @@ gulp.task('watch', function () {
 });
 
 gulp.task('default', ['sass', 'scripts', 'font', 'html', 'image']);
-gulp.task('build', ['sass', 'scripts', 'font', 'image', 'html', 'html-format']);
+gulp.task('build', ['sass', 'scripts', 'font', 'image', 'html', 'minify', 'html-format']);
