@@ -10,12 +10,13 @@ var cleanCSS = require('gulp-clean-css');
 var rename = require('gulp-rename');
 var jshint = require('gulp-jshint');
 var jshintStylish = require('jshint-stylish');
+var clean = require('gulp-clean');
 
 // --------------------------------------------------
 // SASS
 // --------------------------------------------------
 
-gulp.task('sass', function () {
+gulp.task('sass', ['clean-css'], function () {
   return gulp
     .src('assets/source/scss/app.scss')
     .pipe(sourcemaps.init())
@@ -35,7 +36,7 @@ gulp.task('sass', function () {
 // JS
 // --------------------------------------------------
 
-gulp.task('js-vendor', function () {
+gulp.task('js-vendor', ['clean-js'], function () {
   return gulp
     .src([
       'assets/source/lib/jquery/jquery-3.0.0.js',
@@ -45,7 +46,7 @@ gulp.task('js-vendor', function () {
     .pipe(gulp.dest('output/js'));
 });
 
-gulp.task('js', function () {
+gulp.task('js', ['clean-js'], function () {
   return gulp
     .src([
       'assets/source/js/app.js',
@@ -55,13 +56,21 @@ gulp.task('js', function () {
     .pipe(gulp.dest('output/js'));
 });
 
+gulp.task('js-standalone', ['clean-js'], function () {
+  return gulp
+    .src([
+      'assets/source/js/standalone/**/*',
+    ])
+    .pipe(gulp.dest('output/js/standalone'));
+});
+
 gulp.task('js-lint', ['js'], function() {
   return gulp.src('assets/source/js/**/*.js')
     .pipe(jshint())
     .pipe(jshint.reporter(jshintStylish));
 });
 
-gulp.task('scripts', ['js-vendor', 'js', 'js-lint']);
+gulp.task('scripts', ['js-vendor', 'js', 'js-lint', 'js-standalone']);
 
 // --------------------------------------------------
 // Minify
@@ -100,10 +109,10 @@ gulp.task('minify', ['minify-js', 'minify-css']);
 // Font
 // --------------------------------------------------
 
-gulp.task('font', function () {
+gulp.task('font', ['clean-font'], function () {
   return gulp
     .src([
-      'assets/fonts/*',
+      'assets/fonts/**/*',
     ])
     .pipe(gulp.dest('output/fonts'));
 });
@@ -112,7 +121,7 @@ gulp.task('font', function () {
 // HTML
 // --------------------------------------------------
 
-gulp.task('html', function () {
+gulp.task('html', ['clean-html'], function () {
   return gulp
     .src([
       'html/pages/*.html',
@@ -138,12 +147,40 @@ gulp.task('html-format', ['html'], function () {
 // IMAGE
 // --------------------------------------------------
 
-gulp.task('image', function () {
+gulp.task('image', ['clean-image'], function () {
   return gulp
     .src([
       'assets/img/**/*',
     ])
     .pipe(gulp.dest('output/img'));
+});
+
+// --------------------------------------------------
+// Clean
+// --------------------------------------------------
+gulp.task('clean-css', function () {
+  return gulp.src('output/css', {read: false})
+      .pipe(clean());
+});
+
+gulp.task('clean-js', function () {
+  return gulp.src('output/js', {read: false})
+      .pipe(clean());
+});
+
+gulp.task('clean-font', function () {
+  return gulp.src('output/fonts', {read: false})
+      .pipe(clean());
+});
+
+gulp.task('clean-image', function () {
+  return gulp.src('output/img', {read: false})
+      .pipe(clean());
+});
+
+gulp.task('clean-html', function () {
+  return gulp.src('output/*.html', {read: false})
+      .pipe(clean());
 });
 
 // --------------------------------------------------
